@@ -19,13 +19,18 @@
     "custom-scrollbar",
     "ui",
     "ux",
-    "interface"
+    "interface",
+    "signals",
+    "reactive"
   ],
   "main": "index.js",
   "files": [
     "CHANGELOG.md",
     "LICENSE",
     "README.md",
+    "css/scrollbar.css",
+    "examples/example.html",
+    "examples/example.js",
     "index.js"
   ],
   "engines": {
@@ -40,6 +45,9 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@rvanbaalen/signals": "^1.0.0"
   },
   "devDependencies": {
     "@rvanbaalen/eslint-config": "^1.0.2",

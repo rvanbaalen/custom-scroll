@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Scrollbar Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 0;
+      margin: 0;
+    }
+
+    .container {
+      position: relative;
+      width: 80%;
+      height: 500px;
+      margin: 50px auto;
+      overflow: hidden;
+      border: 1px solid #ccc;
+    }
+
+    .content {
+      width: 2000px;
+      height: 1500px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .content div {
+      width: 100px;
+      height: 100px;
+      background-color: rgba(0, 100, 200, 0.3);
+      border: 1px solid #069;
+      float: left;
+      margin: 10px;
+      text-align: center;
+      line-height: 100px;
+    }
+
+    .controls {
+      text-align: center;
+      margin: 20px;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin: 0 5px;
+      border: none;
+      background-color: #4c84ff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #3a70e0;
+    }
+
+    .info {
+      text-align: center;
+      margin: 10px;
+      color: #666;
+    }
+
+    /* Custom scrollbar styles */
+    .custom-scrollbar-track {
+      position: absolute;
+      background-color: rgba(241, 241, 241, 0.7);
+      border-radius: 4px;
+    }
+
+    .custom-scrollbar-thumb {
+      position: absolute;
+      background-color: #888;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .custom-scrollbar-thumb:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Custom Scrollbar with Signals</h1>
+
+  <div class="info">
+    <div id="scrollPosition">Scroll Position: X: 0px, Y: 0px</div>
+  </div>
+
+  <div class="controls">
+    <button id="scrollToStartBtn">Scroll to Start</button>
+    <button id="scrollToMiddleBtn">Scroll to Middle</button>
+    <button id="scrollToEndBtn">Scroll to End</button>
+    <button id="scrollRightBtn">Scroll Right +100px</button>
+    <button id="scrollDownBtn">Scroll Down +100px</button>
+    <button id="smoothScrollBtn">Smooth Scroll to End</button>
+  </div>
+
+  <div id="container" class="container">
+    <div id="content" class="content">
+      <!-- Generate 100 items -->
+      <script>
+        document.write(Array.from({ length: 100 }, (_, i) =>
+          `<div>${i + 1}</div>`
+        ).join(''));
+      </script>
+    </div>
+  </div>
+
+  <script type="module">
+    import { HorizontalScrollbar, VerticalScrollbar } from '../index.js';
+
+    // Get elements
+    const container = document.getElementById('container');
+    const content = document.getElementById('content');
+    const scrollPosition = document.getElementById('scrollPosition');
+
+    // Create horizontal scrollbar
+    const hScrollbar = new HorizontalScrollbar({
+      container,
+      contentWidth: content.offsetWidth,
+      visibleWidth: container.offsetWidth,
+      onScroll: (scrollX) => {
+        content.style.transform = `translate(-${scrollX}px, -${vScrollbar.scrollValue}px)`;
+        updateScrollInfo();
+      }
+    });
+
+    // Create vertical scrollbar
+    const vScrollbar = new VerticalScrollbar({
+      container,
+      contentHeight: content.offsetHeight,
+      visibleHeight: container.offsetHeight,
+      onScroll: (scrollY) => {
+        content.style.transform = `translate(-${hScrollbar.scrollValue}px, -${scrollY}px)`;
+        updateScrollInfo();
+      }
+    });
+
+    // Update scroll info
+    function updateScrollInfo() {
+      scrollPosition.textContent = `Scroll Position: X: ${Math.round(hScrollbar.scrollValue)}px, Y: ${Math.round(vScrollbar.scrollValue)}px`;
+    }
+
+    // Button event listeners
+    document.getElementById('scrollToStartBtn').addEventListener('click', () => {
+      hScrollbar.scrollTo(0);
+      vScrollbar.scrollTo(0);
+    });
+
+    document.getElementById('scrollToMiddleBtn').addEventListener('click', () => {
+      const middleX = (hScrollbar.store.state.contentSize - hScrollbar.store.state.visibleSize) / 2;
+      const middleY = (vScrollbar.store.state.contentSize - vScrollbar.store.state.visibleSize) / 2;
+      hScrollbar.scrollTo(middleX);
+      vScrollbar.scrollTo(middleY);
+    });
+
+    document.getElementById('scrollToEndBtn').addEventListener('click', () => {
+      const endX = hScrollbar.store.state.contentSize - hScrollbar.store.state.visibleSize;
+      const endY = vScrollbar.store.state.contentSize - vScrollbar.store.state.visibleSize;
+      hScrollbar.scrollTo(endX);
+      vScrollbar.scrollTo(endY);
+    });
+
+    document.getElementById('scrollRightBtn').addEventListener('click', () => {
+      hScrollbar.scrollTo(hScrollbar.scrollValue + 100);
+    });
+
+    document.getElementById('scrollDownBtn').addEventListener('click', () => {
+      vScrollbar.scrollTo(vScrollbar.scrollValue + 100);
+    });
+
+    document.getElementById('smoothScrollBtn').addEventListener('click', () => {
+      smoothScrollTo(
+        hScrollbar,
+        hScrollbar.store.state.contentSize - hScrollbar.store.state.visibleSize,
+        1000
+      );
+    });
+
+    // Smooth scroll animation function
+    function smoothScrollTo(scrollbar, targetPosition, duration = 500) {
+      const startPosition = scrollbar.scrollValue;
+      const distance = targetPosition - startPosition;
+      const startTime = performance.now();
+
+      function step(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Use easing function for smoother animation
+        const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+
+        const currentPosition = startPosition + (distance * easeProgress);
+        scrollbar.scrollTo(currentPosition);
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    // Handle window resize to update scrollbar dimensions
+    window.addEventListener('resize', () => {
+      hScrollbar.setVisibleSize(container.offsetWidth);
+      vScrollbar.setVisibleSize(container.offsetHeight);
+    });
+
+    // Advanced signal usage example - link scrollbars together with offset
+    const hScrollSignal = hScrollbar.getScrollSignal();
+    let preventVScrollUpdate = false;
+
+    hScrollSignal.connect((scrollX) => {
+      if (preventVScrollUpdate) return;
+
+      // Only follow horizontal scroll after the first 200px
+      if (scrollX > 200) {
+        preventVScrollUpdate = true;
+        const ratio = (scrollX - 200) / ((hScrollbar.store.state.contentSize - 200) - hScrollbar.store.state.visibleSize);
+        const targetY = ratio * (vScrollbar.store.state.contentSize - vScrollbar.store.state.visibleSize);
+        vScrollbar.scrollTo(Math.max(0, targetY));
+        setTimeout(() => { preventVScrollUpdate = false; }, 50);
+      }
+    });
+  </script>
+</body>
+</html>
