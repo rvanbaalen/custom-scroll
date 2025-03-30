@@ -1,7 +1,7 @@
 {
   "name": "@rvanbaalen/custom-scroll",
   "type": "module",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A lightweight, customizable scrollbar library for JavaScript applications.",
   "author": "Robin van Baalen",
   "license": "MIT",
