@@ -36,7 +36,7 @@ import { HorizontalScrollbar, VerticalScrollbar } from '@rvanbaalen/custom-scrol
 // Create a horizontal scrollbar
 const horizontalScrollbar = new HorizontalScrollbar({
   container: document.getElementById('my-container'),
-  contentWidth: 2000,  // Total scrollable width
+  contentWidth: 2000,  // Total scrollable width in pixels
   visibleWidth: 500,   // Width of the visible area
   onScroll: (scrollX) => {
     // Handle horizontal scroll
